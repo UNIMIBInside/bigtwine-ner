@@ -1,27 +1,33 @@
-package it.unimib.disco.bigtwine.ner;
+package it.unimib.disco.bigtwine.ner.producers;
 
+import it.unimib.disco.bigtwine.ner.Recognizer;
 import javafx.util.Builder;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.Writer;
 
-public final class InputProducerBuilder implements Builder<InputProducer> {
+public class InputProducerBuilder implements Builder<InputProducer> {
 
     private Recognizer recognizer;
 
     private Writer writer;
 
-    public void setRecognizer(Recognizer recognizer) {
+    public static InputProducerBuilder getDefaultBuilder() {
+        return new InputProducerBuilder();
+    }
+
+    public InputProducerBuilder setRecognizer(Recognizer recognizer) {
         this.recognizer = recognizer;
+        return this;
     }
 
     public Recognizer getRecognizer() {
         return recognizer;
     }
 
-    public void setWriter(Writer writer) {
+    public InputProducerBuilder setWriter(Writer writer) {
         this.writer = writer;
+        return this;
     }
 
     public Writer getWriter() {

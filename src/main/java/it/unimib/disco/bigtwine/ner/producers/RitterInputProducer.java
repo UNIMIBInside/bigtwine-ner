@@ -1,4 +1,4 @@
-package it.unimib.disco.bigtwine.ner;
+package it.unimib.disco.bigtwine.ner.producers;
 
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 import org.apache.commons.csv.CSVFormat;
@@ -7,7 +7,7 @@ import org.apache.commons.csv.CSVPrinter;
 import java.io.*;
 
 
-final public class RitterInputProducer implements InputProducer, Closeable {
+final public class RitterInputProducer implements InputProducer {
     private Writer writer;
     private BufferedWriter buffer;
     private CSVPrinter csvPrinter;
@@ -35,6 +35,7 @@ final public class RitterInputProducer implements InputProducer, Closeable {
 
     @Override
     public void appendTweet(BasicTweet tweet) throws IOException {
+        if (this.buffer == null) throw new AssertionError("A writer was not set");
         this.csvPrinter.printRecord(tweet.getId(), tweet.getText());
     }
 
@@ -58,6 +59,13 @@ final public class RitterInputProducer implements InputProducer, Closeable {
 
     @Override
     public void close() throws IOException {
+        if (this.buffer == null) throw new AssertionError("A writer was not set");
         this.buffer.close();
+    }
+
+    @Override
+    public void flush() throws IOException {
+        if (this.buffer == null) throw new AssertionError("A writer was not set");
+        this.buffer.flush();
     }
 }

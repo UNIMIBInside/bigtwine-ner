@@ -1,11 +1,13 @@
-package it.unimib.disco.bigtwine.ner;
+package it.unimib.disco.bigtwine.ner.producers;
 
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.Writer;
 
-public interface InputProducer {
+public interface InputProducer extends Closeable, Flushable {
 
     void setWriter(Writer writer) throws IOException;
     Writer getWriter();
