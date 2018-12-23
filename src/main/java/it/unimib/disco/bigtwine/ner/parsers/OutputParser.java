@@ -1,4 +1,4 @@
-package it.unimib.disco.bigtwine.ner;
+package it.unimib.disco.bigtwine.ner.parsers;
 
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 

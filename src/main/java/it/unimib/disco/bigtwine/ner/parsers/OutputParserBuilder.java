@@ -1,17 +1,23 @@
-package it.unimib.disco.bigtwine.ner;
+package it.unimib.disco.bigtwine.ner.parsers;
 
+import it.unimib.disco.bigtwine.ner.Recognizer;
 import javafx.util.Builder;
 
 import java.io.*;
 
-public final class OutputParserBuilder implements Builder<OutputParser> {
+public class OutputParserBuilder implements Builder<OutputParser> {
 
     private Recognizer recognizer;
 
     private Reader reader;
 
-    public void setRecognizer(Recognizer recognizer) {
+    public static OutputParserBuilder getDefaultBuilder() {
+        return new OutputParserBuilder();
+    }
+
+    public OutputParserBuilder setRecognizer(Recognizer recognizer) {
         this.recognizer = recognizer;
+        return this;
     }
 
     public Recognizer getRecognizer() {
@@ -22,20 +28,22 @@ public final class OutputParserBuilder implements Builder<OutputParser> {
         return reader;
     }
 
-    public void setReader(Reader reader) {
+    public OutputParserBuilder setReader(Reader reader) {
         this.reader = reader;
+        return this;
     }
 
     public void setInput(String string) {
         this.reader = new StringReader(string);
     }
 
-    public void setInput(File file) {
+    public OutputParserBuilder setInput(File file) {
         try {
             this.reader = new FileReader(file);
         } catch (FileNotFoundException e) {
             this.reader = null;
         }
+        return this;
     }
 
     @Override
