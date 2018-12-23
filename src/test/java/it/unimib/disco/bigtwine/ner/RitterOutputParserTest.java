@@ -1,6 +1,7 @@
 package it.unimib.disco.bigtwine.ner;
 
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
+import it.unimib.disco.bigtwine.ner.parsers.RitterOutputParser;
 import org.junit.Test;
 
 import java.io.File;
