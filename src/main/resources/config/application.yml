@@ -89,6 +89,14 @@ spring:
             enabled: false
     thymeleaf:
         mode: HTML
+    cloud:
+        stream:
+            bindings:
+                nerResponsesChannel:
+                    destination: ner-responses
+                    content-type: application/json
+                nerRequestsChannel:
+                    destination: ner-requests
 
 server:
     servlet:
@@ -143,4 +151,12 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+    default-recognizer: ritter
+    working-directory: /Users/Fausto/Desktop/ner
+    use-tmp-working-directory: false
+    file-monitor-suffix-filter: .out
+    executors-confs:
+        ritter:
+            classify: true
+
