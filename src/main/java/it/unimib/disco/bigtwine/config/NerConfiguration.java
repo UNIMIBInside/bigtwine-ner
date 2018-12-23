@@ -10,14 +10,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class NerConfiguration {
 
+    private ApplicationProperties appProps;
+
+    public NerConfiguration(ApplicationProperties appProps) {
+         this.appProps = appProps;
+    }
+
     @Bean
     public ProcessorFactory getProcessorFactory() {
-        return ProcessorFactory.getFactory();
+        return new ProcessorFactory(this.appProps.getProcessors(), this.getExecutorFactory());
     }
 
     @Bean
     public ExecutorFactory getExecutorFactory() {
-        return ExecutorFactory.getFactory();
+        return new ExecutorFactory(this.appProps.getExecutors());
     }
 
     @Bean

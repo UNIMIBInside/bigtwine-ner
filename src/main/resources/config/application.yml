@@ -153,10 +153,12 @@ jhipster:
 
 application:
     default-recognizer: ritter
-    working-directory: /Users/Fausto/Desktop/ner
-    use-tmp-working-directory: false
-    file-monitor-suffix-filter: .out
-    executors-confs:
+    processors:
         ritter:
+            working-directory: /Users/Fausto/Desktop/ner
+            use-tmp-working-directory: false
+            file-monitor-suffix-filter: .out
+    executors:
+        ritter-docker:
             classify: true
 

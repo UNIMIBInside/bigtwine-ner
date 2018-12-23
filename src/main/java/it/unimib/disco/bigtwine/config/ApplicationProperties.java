@@ -16,19 +16,76 @@ import java.util.Map;
  */
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 public class ApplicationProperties {
-    private String workingDirectory = "/tmp/ner";
-    private String defaultRecognizer = "ritter";
-    private boolean useTmpWorkingDirectory = false;
-    private String fileMonitorSuffixFilter = null;
-    private final ExecutorsConfs executorsConfs = new ExecutorsConfs();
+    private String defaultRecognizer = ApplicationDefaults.defaultRecognizer;
+    private final Executors executors = new Executors();
+    private final Processors processors = new Processors();
 
+    public static class Executors {
 
-    public String getWorkingDirectory() {
-        return workingDirectory;
+        private final RitterDocker ritterDocker = new RitterDocker();
+
+        public static class RitterDocker {
+            private boolean classify = ApplicationDefaults.Executors.RitterDocker.classify;
+
+            public boolean isClassify() {
+                return classify;
+            }
+
+            public boolean getClassify() {
+                return classify;
+            }
+
+            public void setClassify(boolean classify) {
+                this.classify = classify;
+            }
+        }
+
+        public RitterDocker getRitterDocker() {
+            return ritterDocker;
+        }
     }
 
-    public void setWorkingDirectory(String workingDirectory) {
-        this.workingDirectory = workingDirectory;
+    public static class Processors {
+
+        private final Ritter ritter = new Ritter();
+
+        public static class Ritter {
+            private String workingDirectory = ApplicationDefaults.Processors.Ritter.workingDirectory;
+            private boolean useTmpWorkingDirectory = ApplicationDefaults.Processors.Ritter.useTmpWorkingDirectory;
+            private String fileMonitorSuffixFilter = ApplicationDefaults.Processors.Ritter.fileMonitorSuffixFilter;
+
+            public String getWorkingDirectory() {
+                return workingDirectory;
+            }
+
+            public void setWorkingDirectory(String workingDirectory) {
+                this.workingDirectory = workingDirectory;
+            }
+
+            public boolean getUseTmpWorkingDirectory() {
+                return useTmpWorkingDirectory;
+            }
+
+            public void setUseTmpWorkingDirectory(boolean useTmpWorkingDirectory) {
+                this.useTmpWorkingDirectory = useTmpWorkingDirectory;
+            }
+
+            public boolean isUseTmpWorkingDirectory() {
+                return useTmpWorkingDirectory;
+            }
+
+            public String getFileMonitorSuffixFilter() {
+                return fileMonitorSuffixFilter;
+            }
+
+            public void setFileMonitorSuffixFilter(String fileMonitorSuffixFilter) {
+                this.fileMonitorSuffixFilter = fileMonitorSuffixFilter;
+            }
+        }
+
+        public Ritter getRitter() {
+            return this.ritter;
+        }
     }
 
     public String getDefaultRecognizer() {
@@ -41,45 +98,11 @@ public class ApplicationProperties {
         Recognizer.setDefault(recognizer);
     }
 
-    public boolean getUseTmpWorkingDirectory() {
-        return useTmpWorkingDirectory;
+    public Executors getExecutors() {
+        return this.executors;
     }
 
-    public void setUseTmpWorkingDirectory(boolean useTmpWorkingDirectory) {
-        this.useTmpWorkingDirectory = useTmpWorkingDirectory;
-    }
-
-    public boolean isUseTmpWorkingDirectory() {
-        return useTmpWorkingDirectory;
-    }
-
-    public String getFileMonitorSuffixFilter() {
-        return fileMonitorSuffixFilter;
-    }
-
-    public void setFileMonitorSuffixFilter(String fileMonitorSuffixFilter) {
-        this.fileMonitorSuffixFilter = fileMonitorSuffixFilter;
-    }
-
-    public ExecutorsConfs getExecutorsConfs() {
-        return this.executorsConfs;
-    }
-
-    public static class ExecutorsConfs {
-
-        private final Map<String, Object> ritter = new HashMap<>();
-
-        public Map<String, Object> getRitter() {
-            return this.ritter;
-        }
-
-        public Map<String, Object> getById(@NotNull String executorId) {
-            if (executorId.equals("ritter")) {
-                return this.getRitter();
-            }else {
-                return null;
-            }
-        }
-
+    public Processors getProcessors() {
+        return this.processors;
     }
 }

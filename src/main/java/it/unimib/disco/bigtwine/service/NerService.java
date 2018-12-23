@@ -39,8 +39,6 @@ public class NerService implements ProcessorListener {
     private MessageChannel channel;
     private ProcessorFactory processorFactory;
     private ExecutorFactory executorFactory;
-    private InputProducerBuilder inputProducerBuilder;
-    private OutputParserBuilder outputParserBuilder;
     private Map<Recognizer, Processor> processors = new HashMap<>();
     private ApplicationProperties appProps;
 
@@ -54,11 +52,7 @@ public class NerService implements ProcessorListener {
         this.channel = channel.nerResponsesChannel();
         this.processorFactory = processorFactory;
         this.executorFactory = executorFactory;
-        this.inputProducerBuilder = inputProducerBuilder;
-        this.outputParserBuilder = outputParserBuilder;
         this.appProps = appProps;
-
-        System.out.println("Qui!!! " + this.appProps.getExecutorsConfs().getRitter());
 
         Executors.newSingleThreadScheduledExecutor().schedule(new Runnable() {
             @Override
@@ -99,49 +93,25 @@ public class NerService implements ProcessorListener {
         if (this.processors.containsKey(recognizer)) {
             processor = this.processors.get(recognizer);
         }else {
-            Executor executor = this.executorFactory.getExecutor(recognizer);
-            executor.setExecutorConf(this.appProps.getExecutorsConfs().getById(executor.getExecutorId()));
-            processor = this.processorFactory.getProcessor(recognizer);
-            processor.setInputProducerBuilder(this.inputProducerBuilder);
-            processor.setOutputParserBuilder(this.outputParserBuilder);
-            processor.setExecutor(executor);
-
-            if (processor instanceof FileProcessor) {
-                final FileProcessor p = ((FileProcessor) processor);
-                final boolean useTmpWD = this.appProps.getUseTmpWorkingDirectory();
-                String wd = this.appProps.getWorkingDirectory();
-
-                if (useTmpWD || wd == null) {
-                    try {
-                        wd = Files.createTempDirectory("ner").toString();
-                    }catch (IOException | SecurityException e) {
-                        log.error("Cannot create tmp dir: " + e.getLocalizedMessage());
-                        return null;
-                    }
-                }
-
-                p.setWorkingDirectory(wd);
+            try {
+                processor = this.processorFactory.getProcessor(recognizer);
+            } catch (Exception e) {
+                System.err.println("Cannot create processor");
+                log.error("Cannot create processor");
+                return null;
             }
-
-            if (processor instanceof AsyncFileProcessor) {
-                final AsyncFileProcessor p = ((AsyncFileProcessor) processor);
-                final String suffixFilter = this.appProps.getFileMonitorSuffixFilter();
-
-                if (suffixFilter != null) {
-                    p.setMonitorFilesOnly(true);
-                    p.setMonitorSuffixFilter(suffixFilter);
-                }
-            }
-
             processor.setListener(this);
             boolean processorReady = processor.configureProcessor();
             if (processorReady) {
                 this.processors.put(recognizer, processor);
             }else {
+                System.err.println("Processor not ready: " + processor.getRecognizer().toString());
                 log.error("Processor not ready: " + processor.getRecognizer().toString());
                 return null;
             }
         }
+
+        log.info("Processor ready: " + processor.getClass().toString());
 
         return processor;
     }
