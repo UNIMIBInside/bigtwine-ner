@@ -1,4 +1,4 @@
-package it.unimib.disco.bigtwine.ner;
+package it.unimib.disco.bigtwine.ner.parsers;
 
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.ner.parsers.RitterOutputParser;
@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class RitterOutputParserTest {
     @Test
-    public void test_parse_single() {
+    public void testParseSingle() {
         String input = String.join("\n",
             "[#ID#]\t536886411509899000",
             "[#ETS#]\tIbiza \tperson \t0.666666666667",
@@ -39,7 +39,7 @@ public class RitterOutputParserTest {
 
 
     @Test
-    public void test_parse_multiple() throws IOException {
+    public void testParseMultiple() throws IOException {
         String input = String.join("\n",
             "[#ID#]\t536886411509899000",
             "[#ETS#]\tIbiza \tperson \t0.666666666667",
@@ -69,7 +69,7 @@ public class RitterOutputParserTest {
     }
 
     @Test
-    public void test_parse_file() throws IOException {
+    public void testParseFile() throws IOException {
         File file = new File("src/test/resources/samples/ner-test-input.txt");
 
         assertTrue(file.exists());

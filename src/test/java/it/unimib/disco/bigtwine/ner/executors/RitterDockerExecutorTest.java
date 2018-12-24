@@ -1,4 +1,4 @@
-package it.unimib.disco.bigtwine.executors;
+package it.unimib.disco.bigtwine.ner.executors;
 
 import it.unimib.disco.bigtwine.commons.executors.DockerExecutor;
 import it.unimib.disco.bigtwine.ner.executors.RitterDockerExecutor;
