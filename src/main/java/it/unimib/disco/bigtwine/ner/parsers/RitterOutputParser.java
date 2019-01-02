@@ -178,7 +178,7 @@ final public class RitterOutputParser implements OutputParser {
     }
 
     @Override
-    public RecognizedTweet[] tweets() {
+    public RecognizedTweet[] items() {
         List<RecognizedTweet> tweets = new ArrayList<>();
         while (this.hasNext()) {
             tweets.add(this.nextTweet);
