@@ -17,7 +17,7 @@ public class RitterInputProducerTest {
         BasicTweet tweet = new BasicTweet();
         tweet.setId("1");
         tweet.setText("prova");
-        producer.appendTweet(tweet);
+        producer.append(tweet);
 
         producer.close();
 
@@ -38,7 +38,7 @@ public class RitterInputProducerTest {
         BasicTweet tweet2 = new BasicTweet();
         tweet2.setId("2");
         tweet2.setText("prova2");
-        producer.appendTweets(new BasicTweet[]{tweet1, tweet2});
+        producer.append(new BasicTweet[]{tweet1, tweet2});
 
         producer.close();
 

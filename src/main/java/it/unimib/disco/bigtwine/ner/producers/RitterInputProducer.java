@@ -34,16 +34,9 @@ final public class RitterInputProducer implements InputProducer {
     }
 
     @Override
-    public void appendTweet(BasicTweet tweet) throws IOException {
+    public void append(BasicTweet tweet) throws IOException {
         if (this.buffer == null) throw new AssertionError("A writer was not set");
         this.csvPrinter.printRecord(tweet.getId(), tweet.getText());
-    }
-
-    @Override
-    public void appendTweets(BasicTweet[] tweets) throws IOException {
-        for (BasicTweet tweet : tweets) {
-            this.appendTweet(tweet);
-        }
     }
 
     @Override

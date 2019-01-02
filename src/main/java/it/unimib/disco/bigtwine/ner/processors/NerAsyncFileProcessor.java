@@ -221,7 +221,7 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
         }
 
         try {
-            inputProducer.appendTweets(tweets);
+            inputProducer.append(tweets);
             inputProducer.close();
         } catch (IOException e) {
             return false;
