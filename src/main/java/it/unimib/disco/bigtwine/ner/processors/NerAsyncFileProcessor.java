@@ -5,6 +5,7 @@ import it.unimib.disco.bigtwine.commons.executors.AsyncFileExecutor;
 import it.unimib.disco.bigtwine.commons.executors.Executor;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
+import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.commons.processors.file.AsyncFileProcessor;
 import it.unimib.disco.bigtwine.ner.parsers.OutputParser;
 import it.unimib.disco.bigtwine.ner.parsers.OutputParserBuilder;
@@ -61,23 +62,19 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
     }
 
 
-    @Override
     public InputProducerBuilder getInputProducerBuilder() {
         return this.inputProducerBuilder;
     }
 
-    @Override
     public void setInputProducerBuilder(InputProducerBuilder producerBuilder) {
         this.inputProducerBuilder = producerBuilder
             .setRecognizer(this.getRecognizer());
     }
 
-    @Override
     public OutputParserBuilder getOutputParserBuilder() {
         return this.outputParserBuilder;
     }
 
-    @Override
     public void setOutputParserBuilder(OutputParserBuilder outputParserBuilder) {
         this.outputParserBuilder = outputParserBuilder
             .setRecognizer(this.getRecognizer());
@@ -197,6 +194,11 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
         }
 
         return true;
+    }
+
+    @Override
+    public boolean process(String tag, BasicTweet tweet) {
+        return this.process(tag, new BasicTweet[]{tweet});
     }
 
     @Override

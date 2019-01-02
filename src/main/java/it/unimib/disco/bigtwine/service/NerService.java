@@ -5,6 +5,8 @@ import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
+import it.unimib.disco.bigtwine.commons.processors.GenericProcessor;
+import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.commons.processors.file.AsyncFileProcessor;
 import it.unimib.disco.bigtwine.commons.processors.file.FileProcessor;
 import it.unimib.disco.bigtwine.config.ApplicationProperties;
@@ -15,7 +17,6 @@ import it.unimib.disco.bigtwine.ner.executors.ExecutorFactory;
 import it.unimib.disco.bigtwine.ner.parsers.OutputParserBuilder;
 import it.unimib.disco.bigtwine.ner.processors.Processor;
 import it.unimib.disco.bigtwine.ner.processors.ProcessorFactory;
-import it.unimib.disco.bigtwine.ner.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.ner.producers.InputProducerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class NerService implements ProcessorListener {
+public class NerService implements ProcessorListener<RecognizedTweet> {
 
     private final Logger log = LoggerFactory.getLogger(NerService.class);
 
@@ -151,7 +152,11 @@ public class NerService implements ProcessorListener {
     }
 
     @Override
-    public void onProcessed(Processor processor, String tag, RecognizedTweet[] tweets) {
-        this.sendResponse(processor, tag, tweets);
+    public void onProcessed(GenericProcessor processor, String tag, RecognizedTweet[] tweets) {
+        if (!(processor instanceof Processor)) {
+            throw new AssertionError("Invalid processor type");
+        }
+
+        this.sendResponse((Processor)processor, tag, tweets);
     }
 }
