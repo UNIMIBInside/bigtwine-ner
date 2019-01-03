@@ -3,6 +3,7 @@ package it.unimib.disco.bigtwine.ner.processors;
 import it.unimib.disco.bigtwine.commons.executors.AsyncExecutor;
 import it.unimib.disco.bigtwine.commons.executors.AsyncFileExecutor;
 import it.unimib.disco.bigtwine.commons.executors.Executor;
+import it.unimib.disco.bigtwine.commons.executors.FileExecutor;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
@@ -33,7 +34,7 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
     protected String inputDirectory;
     protected boolean monitorFilesOnly;
     protected String monitorSuffixFilter;
-    protected ProcessorListener processorListener;
+    protected ProcessorListener<RecognizedTweet> processorListener;
 
     public NerAsyncFileProcessor(AsyncFileExecutor executor, InputProducerBuilder inputProducerBuilder, OutputParserBuilder outputParserBuilder) {
         this.setExecutor(executor);
@@ -94,6 +95,11 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
     }
 
     @Override
+    public FileExecutor getFileExecutor() {
+        return this.executor;
+    }
+
+    @Override
     public AsyncExecutor getAsyncExecutor() {
         return this.executor;
     }
@@ -148,7 +154,7 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
     }
 
     @Override
-    public void setListener(ProcessorListener listener) {
+    public void setListener(ProcessorListener<RecognizedTweet> listener) {
         this.processorListener = listener;
     }
 
@@ -181,8 +187,8 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
             return false;
         }
 
-        this.getAsyncFileExecutor().setInputPath(this.inputDirectory);
-        this.getAsyncFileExecutor().setOutputPath(this.outputDirectory);
+        this.getFileExecutor().setInputPath(this.inputDirectory);
+        this.getFileExecutor().setOutputPath(this.outputDirectory);
         this.getAsyncExecutor().run();
 
         if (!this.configureFileMonitor()) {

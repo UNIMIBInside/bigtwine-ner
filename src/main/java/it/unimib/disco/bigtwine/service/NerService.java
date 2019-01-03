@@ -1,23 +1,16 @@
 package it.unimib.disco.bigtwine.service;
 
-import it.unimib.disco.bigtwine.commons.executors.Executor;
 import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.commons.processors.GenericProcessor;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
-import it.unimib.disco.bigtwine.commons.processors.file.AsyncFileProcessor;
-import it.unimib.disco.bigtwine.commons.processors.file.FileProcessor;
-import it.unimib.disco.bigtwine.config.ApplicationProperties;
 import it.unimib.disco.bigtwine.messaging.NerRequestsConsumerChannel;
 import it.unimib.disco.bigtwine.messaging.NerResponsesProducerChannel;
 import it.unimib.disco.bigtwine.ner.Recognizer;
-import it.unimib.disco.bigtwine.ner.executors.ExecutorFactory;
-import it.unimib.disco.bigtwine.ner.parsers.OutputParserBuilder;
 import it.unimib.disco.bigtwine.ner.processors.Processor;
 import it.unimib.disco.bigtwine.ner.processors.ProcessorFactory;
-import it.unimib.disco.bigtwine.ner.producers.InputProducerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -25,8 +18,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -39,21 +30,13 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
 
     private MessageChannel channel;
     private ProcessorFactory processorFactory;
-    private ExecutorFactory executorFactory;
     private Map<Recognizer, Processor> processors = new HashMap<>();
-    private ApplicationProperties appProps;
 
     public NerService(
         NerResponsesProducerChannel channel,
-        ProcessorFactory processorFactory,
-        ExecutorFactory executorFactory,
-        InputProducerBuilder inputProducerBuilder,
-        OutputParserBuilder outputParserBuilder,
-        ApplicationProperties appProps) {
+        ProcessorFactory processorFactory) {
         this.channel = channel.nerResponsesChannel();
         this.processorFactory = processorFactory;
-        this.executorFactory = executorFactory;
-        this.appProps = appProps;
 
         Executors.newSingleThreadScheduledExecutor().schedule(new Runnable() {
             @Override
