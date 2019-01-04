@@ -204,7 +204,6 @@ dependencies {
     testCompile "org.hamcrest:hamcrest-library"
     testCompile "org.springframework.cloud:spring-cloud-stream-test-support"
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
-    compile group: "org.apache.commons", name: "commons-csv", version: "1.6"
     compile project(':commons')
 }
 

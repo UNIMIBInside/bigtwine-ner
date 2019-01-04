@@ -33,8 +33,9 @@ public class OutputParserBuilder implements Builder<OutputParser> {
         return this;
     }
 
-    public void setInput(String string) {
+    public OutputParserBuilder setInput(String string) {
         this.reader = new StringReader(string);
+        return this;
     }
 
     public OutputParserBuilder setInput(File file) {

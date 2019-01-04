@@ -1,42 +1,39 @@
 package it.unimib.disco.bigtwine.ner.producers;
 
+import it.unimib.disco.bigtwine.commons.csv.CSVFactory;
+import it.unimib.disco.bigtwine.commons.csv.CSVWriter;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 
 import java.io.*;
 
 
 final public class RitterInputProducer implements InputProducer {
+    static private final char columnDelimiter = '\t';
+    private CSVFactory csvFactory;
     private Writer writer;
     private BufferedWriter buffer;
-    private CSVPrinter csvPrinter;
+    private CSVWriter csvWriter;
 
-    public RitterInputProducer() {
-
-    }
-
-    public RitterInputProducer(Writer writer) throws IOException {
-        this();
-        this.setWriter(writer);
+    public RitterInputProducer(CSVFactory csvFactory) {
+        this.csvFactory = csvFactory;
     }
 
     @Override
     public void setWriter(Writer writer) throws IOException {
         this.writer = writer;
         this.buffer = new BufferedWriter(writer);
-        this.csvPrinter = new CSVPrinter(this.buffer, CSVFormat.DEFAULT.withDelimiter('\t'));
+        this.csvWriter = this.csvFactory.getWriter(this.buffer, columnDelimiter);
     }
 
     @Override
     public Writer getWriter() {
-        return null;
+        return this.writer;
     }
 
     @Override
     public void append(BasicTweet tweet) throws IOException {
         if (this.buffer == null) throw new AssertionError("A writer was not set");
-        this.csvPrinter.printRecord(tweet.getId(), tweet.getText());
+        this.csvWriter.writeRecord(tweet.getId(), tweet.getText());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package it.unimib.disco.bigtwine.ner.producers;
 
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
+import it.unimib.disco.bigtwine.ner.Recognizer;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -11,8 +12,11 @@ public class RitterInputProducerTest {
     @Test
     public void testProduceSingle() throws Exception {
         StringWriter writer = new StringWriter();
-        RitterInputProducer producer = new RitterInputProducer();
-        producer.setWriter(writer);
+        InputProducer producer = InputProducerBuilder
+            .getDefaultBuilder()
+            .setRecognizer(Recognizer.ritter)
+            .setWriter(writer)
+            .build();
 
         BasicTweet tweet = new BasicTweet();
         tweet.setId("1");
@@ -29,8 +33,11 @@ public class RitterInputProducerTest {
     @Test
     public void testProduceMultiple() throws Exception {
         StringWriter writer = new StringWriter();
-        RitterInputProducer producer = new RitterInputProducer();
-        producer.setWriter(writer);
+        InputProducer producer = InputProducerBuilder
+            .getDefaultBuilder()
+            .setRecognizer(Recognizer.ritter)
+            .setWriter(writer)
+            .build();
 
         BasicTweet tweet1 = new BasicTweet();
         tweet1.setId("1");

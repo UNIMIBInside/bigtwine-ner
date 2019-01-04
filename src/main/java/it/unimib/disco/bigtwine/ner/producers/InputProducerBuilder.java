@@ -1,5 +1,6 @@
 package it.unimib.disco.bigtwine.ner.producers;
 
+import it.unimib.disco.bigtwine.commons.csv.CSVFactory;
 import it.unimib.disco.bigtwine.ner.Recognizer;
 import javafx.util.Builder;
 
@@ -47,7 +48,7 @@ public class InputProducerBuilder implements Builder<InputProducer> {
         InputProducer inputProducer;
         switch (this.recognizer) {
             case ritter:
-                inputProducer = new RitterInputProducer();
+                inputProducer = new RitterInputProducer(new CSVFactory());
                 break;
             default:
                 return null;
