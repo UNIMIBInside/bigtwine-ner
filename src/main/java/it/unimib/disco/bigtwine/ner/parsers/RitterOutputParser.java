@@ -1,6 +1,6 @@
 package it.unimib.disco.bigtwine.ner.parsers;
 
-import it.unimib.disco.bigtwine.commons.models.Entity;
+import it.unimib.disco.bigtwine.commons.models.RecognizedTweet.Entity;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 
 import java.io.*;
