@@ -48,7 +48,7 @@ public class InputProducerBuilder implements Builder<InputProducer> {
         InputProducer inputProducer;
         switch (this.recognizer) {
             case ritter:
-                inputProducer = new RitterInputProducer(new CSVFactory());
+                inputProducer = new RitterInputProducer(CSVFactory.getFactory());
                 break;
             default:
                 return null;
