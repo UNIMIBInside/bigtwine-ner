@@ -1,9 +1,7 @@
 package it.unimib.disco.bigtwine.ner.processors;
 
-import it.unimib.disco.bigtwine.commons.executors.AsyncFileExecutor;
+import it.unimib.disco.bigtwine.commons.executors.PerpetualFileExecutor;
 import it.unimib.disco.bigtwine.commons.executors.Executor;
-import it.unimib.disco.bigtwine.commons.processors.file.AsyncFileProcessor;
-import it.unimib.disco.bigtwine.commons.processors.file.FileProcessor;
 import it.unimib.disco.bigtwine.config.ApplicationProperties;
 import it.unimib.disco.bigtwine.ner.Recognizer;
 import it.unimib.disco.bigtwine.ner.executors.ExecutorFactory;
@@ -11,10 +9,10 @@ import it.unimib.disco.bigtwine.ner.parsers.OutputParserBuilder;
 import it.unimib.disco.bigtwine.ner.producers.InputProducerBuilder;
 import org.springframework.beans.factory.FactoryBean;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 
-public class ProcessorFactory implements FactoryBean<Processor> {
+public class ProcessorFactory implements FactoryBean<NerProcessor> {
 
     private Recognizer recognizer;
     private ExecutorFactory executorFactory;
@@ -36,24 +34,25 @@ public class ProcessorFactory implements FactoryBean<Processor> {
     private RitterProcessor getRitterProcessor() throws Exception {
         Executor executor = this.executorFactory.getExecutor(recognizer);
 
-        if (!(executor instanceof AsyncFileExecutor))
-            throw new RuntimeException("Invalid configuration: Ritter processor requires an AsyncFileExecutor.");
+        if (!(executor instanceof PerpetualFileExecutor))
+            throw new RuntimeException("Invalid configuration: Ritter processor requires an PerpetualFileExecutor.");
 
         RitterProcessor processor = new RitterProcessor(
-            (AsyncFileExecutor)executor,
+            (PerpetualFileExecutor)executor,
             InputProducerBuilder.getDefaultBuilder(),
             OutputParserBuilder.getDefaultBuilder());
 
-        final boolean useTmpWD = this.processorsProps.getRitter().getUseTmpWorkingDirectory();
-        String wd = this.processorsProps.getRitter().getWorkingDirectory();
         final String suffixFilter = this.processorsProps.getRitter().getFileMonitorSuffixFilter();
+        final boolean useTmpWD = this.processorsProps.getRitter().getUseTmpWorkingDirectory();
+        final String wds = this.processorsProps.getRitter().getWorkingDirectory();
 
-        if (useTmpWD || wd == null) {
-            wd = Files.createTempDirectory("ner").toString();
+        File wd;
+        if (useTmpWD || wds == null) {
+            wd = Files.createTempDirectory("ner").toFile();
+        }else {
+            wd = new File(wds);
         }
-
         processor.setWorkingDirectory(wd);
-
 
         if (suffixFilter != null) {
             processor.setMonitorFilesOnly(true);
@@ -63,7 +62,7 @@ public class ProcessorFactory implements FactoryBean<Processor> {
         return processor;
     }
 
-    public Processor getProcessor() throws Exception {
+    public NerProcessor getProcessor() throws Exception {
         if (this.recognizer == null) {
             throw new IllegalArgumentException("recognizer not set");
         }
@@ -76,17 +75,17 @@ public class ProcessorFactory implements FactoryBean<Processor> {
         }
     }
 
-    public Processor getProcessor(Recognizer recognizer) throws Exception {
+    public NerProcessor getProcessor(Recognizer recognizer) throws Exception {
         this.setRecognizer(recognizer);
         return this.getProcessor();
     }
 
-    public Processor getDefaultProcessor() throws Exception {
+    public NerProcessor getDefaultProcessor() throws Exception {
         return this.getProcessor(Recognizer.getDefault());
     }
 
     @Override
-    public Processor getObject() throws Exception {
+    public NerProcessor getObject() throws Exception {
         return this.getProcessor();
     }
 

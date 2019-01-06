@@ -9,7 +9,7 @@ import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.messaging.NerRequestsConsumerChannel;
 import it.unimib.disco.bigtwine.messaging.NerResponsesProducerChannel;
 import it.unimib.disco.bigtwine.ner.Recognizer;
-import it.unimib.disco.bigtwine.ner.processors.Processor;
+import it.unimib.disco.bigtwine.ner.processors.NerProcessor;
 import it.unimib.disco.bigtwine.ner.processors.ProcessorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
 
     private MessageChannel channel;
     private ProcessorFactory processorFactory;
-    private Map<Recognizer, Processor> processors = new HashMap<>();
+    private Map<Recognizer, NerProcessor> processors = new HashMap<>();
 
     public NerService(
         NerResponsesProducerChannel channel,
@@ -72,8 +72,8 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
         }
     }
 
-    private Processor getProcessor(Recognizer recognizer) {
-        Processor processor;
+    private NerProcessor getProcessor(Recognizer recognizer) {
+        NerProcessor processor;
         if (this.processors.containsKey(recognizer)) {
             processor = this.processors.get(recognizer);
         }else {
@@ -89,13 +89,13 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
             if (processorReady) {
                 this.processors.put(recognizer, processor);
             }else {
-                System.err.println("Processor not ready: " + processor.getRecognizer().toString());
-                log.error("Processor not ready: " + processor.getRecognizer().toString());
+                System.err.println("NerProcessor not ready: " + processor.getRecognizer().toString());
+                log.error("NerProcessor not ready: " + processor.getRecognizer().toString());
                 return null;
             }
         }
 
-        log.info("Processor ready: " + processor.getClass().toString());
+        log.info("NerProcessor ready: " + processor.getClass().toString());
 
         return processor;
     }
@@ -107,7 +107,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
             return;
         }
 
-        Processor processor = this.getProcessor(recognizer);
+        NerProcessor processor = this.getProcessor(recognizer);
 
         if (processor == null) {
             return;
@@ -116,7 +116,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
         processor.process(request.getRequestId(), request.getTweets());
     }
 
-    private void sendResponse(Processor processor, String tag, RecognizedTweet[] tweets) {
+    private void sendResponse(NerProcessor processor, String tag, RecognizedTweet[] tweets) {
         for (RecognizedTweet tweet : tweets) {
             System.out.println("Recognize tweet: " + tweet.getId());
         }
@@ -136,10 +136,10 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
 
     @Override
     public void onProcessed(GenericProcessor processor, String tag, RecognizedTweet[] tweets) {
-        if (!(processor instanceof Processor)) {
+        if (!(processor instanceof NerProcessor)) {
             throw new AssertionError("Invalid processor type");
         }
 
-        this.sendResponse((Processor)processor, tag, tweets);
+        this.sendResponse((NerProcessor)processor, tag, tweets);
     }
 }

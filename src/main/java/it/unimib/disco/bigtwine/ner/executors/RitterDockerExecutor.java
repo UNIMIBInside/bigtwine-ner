@@ -2,20 +2,17 @@ package it.unimib.disco.bigtwine.ner.executors;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
-import it.unimib.disco.bigtwine.commons.executors.AsyncFileExecutor;
+import it.unimib.disco.bigtwine.commons.executors.PerpetualFileExecutor;
 import it.unimib.disco.bigtwine.commons.executors.DockerExecutor;
-import it.unimib.disco.bigtwine.commons.executors.FileExecutor;
 
-import java.util.*;
+import java.io.File;
 
-public class RitterDockerExecutor extends DockerExecutor implements AsyncFileExecutor {
+public class RitterDockerExecutor extends DockerExecutor implements PerpetualFileExecutor {
     public static final String DOCKER_IMAGE = "bigtwine-tool-ner";
 
-    private Map<String, Object> conf;
-    private String inputPath;
-    private String outputPath;
+    private File inputWorkingDirectory;
+    private File outputWorkingDirectory;
 
     protected RitterDockerExecutor(String dockerImage) {
         super(dockerImage);
@@ -31,46 +28,49 @@ public class RitterDockerExecutor extends DockerExecutor implements AsyncFileExe
     }
 
     @Override
-    public Map<String, Object> getExecutorConf() {
-        return this.conf;
+    public void setInputWorkingDirectory(File inputWorkingDirectory) {
+        this.inputWorkingDirectory = inputWorkingDirectory;
     }
 
     @Override
-    public void setExecutorConf(Map<String, Object> conf) {
-        this.conf = conf;
+    public File getInputWorkingDirectory() {
+        return inputWorkingDirectory;
+    }
+
+    public void setOutputWorkingDirectory(File outputWorkingDirectory) {
+        this.outputWorkingDirectory = outputWorkingDirectory;
     }
 
     @Override
-    protected List<String> getArguments() {
-        return new ArrayList<>();
+    public File getOutputWorkingDirectory() {
+        return outputWorkingDirectory;
+    }
+
+
+    @Override
+    protected String[] buildContainerCommand(String... additionalArgs) {
+        return new String[0];
     }
 
     @Override
-    public void setInputPath(String inputPath) {
-        this.inputPath = inputPath;
+    protected String[] prepareAdditionalContainerArgs(Object... additionalArgs) {
+        return new String[0];
     }
 
     @Override
-    public String getInputPath() {
-        return inputPath;
+    protected void validateExecuteArgs(Object... args) {
+        if (args.length != 0) {
+            throw new IllegalArgumentException("No arguments accepted");
+        }
     }
 
     @Override
-    public void setOutputPath(String outputPath) {
-        this.outputPath = outputPath;
-    }
-
-    @Override
-    public String getOutputPath() {
-        return outputPath;
-    }
-
-    @Override
-    protected CreateContainerCmd createContainer(String image, List<String> args) {
-        return super.createContainer(image, args)
-            .withHostConfig(HostConfig.newHostConfig().withBinds(
-                new Bind(this.getInputPath(), new Volume("/data/input")),
-                new Bind(this.getOutputPath(), new Volume("/data/output"))
-            ));
+    protected void configureContainer(CreateContainerCmd containerCmd, Object... args) {
+        this.setAutoRemove(containerCmd, true);
+        this.bindVolumes(
+            containerCmd,
+            new Bind(this.getInputWorkingDirectory().getAbsolutePath(), new Volume("/data/input")),
+            new Bind(this.getOutputWorkingDirectory().getAbsolutePath(), new Volume("/data/output"))
+        );
     }
 }

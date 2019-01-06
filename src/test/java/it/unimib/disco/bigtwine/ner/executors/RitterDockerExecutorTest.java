@@ -1,16 +1,16 @@
 package it.unimib.disco.bigtwine.ner.executors;
 
-import it.unimib.disco.bigtwine.commons.executors.DockerExecutor;
-import it.unimib.disco.bigtwine.ner.executors.RitterDockerExecutor;
 import org.junit.Test;
+
+import java.io.File;
 
 public class RitterDockerExecutorTest {
 
     @Test
     public void testContainerRun() {
         RitterDockerExecutor executor = new RitterDockerExecutor();
-        executor.setInputPath("/Users/Fausto/Desktop/ner/input");
-        executor.setOutputPath("/Users/Fausto/Desktop/ner/output");
+        executor.setInputWorkingDirectory(new File("/Users/Fausto/Desktop/ner/input"));
+        executor.setOutputWorkingDirectory(new File("/Users/Fausto/Desktop/ner/output"));
         executor.run();
     }
 }

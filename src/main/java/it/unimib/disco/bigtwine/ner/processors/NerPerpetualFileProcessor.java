@@ -1,13 +1,12 @@
 package it.unimib.disco.bigtwine.ner.processors;
 
-import it.unimib.disco.bigtwine.commons.executors.AsyncExecutor;
-import it.unimib.disco.bigtwine.commons.executors.AsyncFileExecutor;
-import it.unimib.disco.bigtwine.commons.executors.Executor;
-import it.unimib.disco.bigtwine.commons.executors.FileExecutor;
+import it.unimib.disco.bigtwine.commons.executors.*;
+import it.unimib.disco.bigtwine.commons.executors.PerpetualFileExecutor;
+import it.unimib.disco.bigtwine.commons.executors.PerpetualExecutor;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
-import it.unimib.disco.bigtwine.commons.processors.file.AsyncFileProcessor;
+import it.unimib.disco.bigtwine.commons.processors.file.PerpetualFileProcessor;
 import it.unimib.disco.bigtwine.ner.parsers.OutputParser;
 import it.unimib.disco.bigtwine.ner.parsers.OutputParserBuilder;
 import it.unimib.disco.bigtwine.ner.producers.InputProducer;
@@ -22,21 +21,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProcessor {
+public abstract class NerPerpetualFileProcessor implements NerProcessor, PerpetualFileProcessor<BasicTweet> {
 
-    protected AsyncFileExecutor executor;
+    protected PerpetualFileExecutor executor;
     protected OutputParserBuilder outputParserBuilder;
     protected InputProducerBuilder inputProducerBuilder;
     protected FileAlterationMonitor fileMonitor;
-    protected String outputDirectory;
     protected String processorId;
-    protected String workingDirectory;
-    protected String inputDirectory;
+    protected File workingDirectory;
+    protected File inputDirectory;
+    protected File outputDirectory;
     protected boolean monitorFilesOnly;
     protected String monitorSuffixFilter;
     protected ProcessorListener<RecognizedTweet> processorListener;
 
-    public NerAsyncFileProcessor(AsyncFileExecutor executor, InputProducerBuilder inputProducerBuilder, OutputParserBuilder outputParserBuilder) {
+    public NerPerpetualFileProcessor(PerpetualFileExecutor executor, InputProducerBuilder inputProducerBuilder, OutputParserBuilder outputParserBuilder) {
         this.setExecutor(executor);
         this.setInputProducerBuilder(inputProducerBuilder);
         this.setOutputParserBuilder(outputParserBuilder);
@@ -53,12 +52,12 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
     }
 
     @Override
-    public String getOutputDirectory() {
+    public File getOutputDirectory() {
         return outputDirectory;
     }
 
     @Override
-    public void setOutputDirectory(String outputDirectory) {
+    public void setOutputDirectory(File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
@@ -88,44 +87,39 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
 
     @Override
     public void setExecutor(Executor executor) {
-        if (!(executor instanceof AsyncFileExecutor)) {
+        if (!(executor instanceof PerpetualFileExecutor)) {
             throw new IllegalArgumentException("Unsupported executor type");
         }
-        this.executor = (AsyncFileExecutor)executor;
+        this.executor = (PerpetualFileExecutor)executor;
     }
 
     @Override
-    public FileExecutor getFileExecutor() {
+    public PerpetualExecutor getPerpetualExecutor() {
         return this.executor;
     }
 
     @Override
-    public AsyncExecutor getAsyncExecutor() {
+    public PerpetualFileExecutor getPerpetualFileExecutor() {
         return this.executor;
     }
 
     @Override
-    public AsyncFileExecutor getAsyncFileExecutor() {
-        return this.executor;
-    }
-
-    @Override
-    public String getInputDirectory() {
+    public File getInputDirectory() {
         return this.inputDirectory;
     }
 
     @Override
-    public void setInputDirectory(String inputDirectory) {
+    public void setInputDirectory(File inputDirectory) {
         this.inputDirectory = inputDirectory;
     }
 
     @Override
-    public String getWorkingDirectory() {
+    public File getWorkingDirectory() {
         return this.workingDirectory;
     }
 
     @Override
-    public void setWorkingDirectory(String workingDirectory) {
+    public void setWorkingDirectory(File workingDirectory) {
         this.workingDirectory = workingDirectory;
     }
 
@@ -159,47 +153,24 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
     }
 
     @Override
-    public boolean setupWorkingDirectory() {
-        boolean res = true;
-        for (String dir : new String[] {this.inputDirectory, this.outputDirectory}) {
-            if (dir == null) continue;
-
-            File dirf = (new File(dir));
-            if (!dirf.exists()) {
-                try {
-                    res &= dirf.mkdirs();
-                }catch (SecurityException e) {
-                    return false;
-                }
-            }
-        }
-
-        return res;
-    }
-
-    @Override
     public boolean configureProcessor() {
         this.processorId = RandomStringUtils.randomAlphanumeric(16);
-        this.inputDirectory = Paths.get(this.getWorkingDirectory(), this.getProcessorId(), "input").toString();
-        this.outputDirectory = Paths.get(this.getWorkingDirectory(), this.getProcessorId(), "output").toString();
+        this.inputDirectory = Paths.get(this.getWorkingDirectory().toString(), this.getProcessorId(), "input").toFile();
+        this.outputDirectory = Paths.get(this.getWorkingDirectory().toString(), this.getProcessorId(), "output").toFile();
 
         if (!this.setupWorkingDirectory()) {
             return false;
         }
 
-        this.getFileExecutor().setInputPath(this.inputDirectory);
-        this.getFileExecutor().setOutputPath(this.outputDirectory);
-        this.getAsyncExecutor().run();
+        this.getPerpetualFileExecutor().setInputWorkingDirectory(this.inputDirectory);
+        this.getPerpetualFileExecutor().setOutputWorkingDirectory(this.outputDirectory);
+        this.getPerpetualExecutor().run();
 
         if (!this.configureFileMonitor()) {
             return false;
         }
 
-        if (!this.startFileMonitor()) {
-            return false;
-        }
-
-        return true;
+        return this.startFileMonitor();
     }
 
     @Override
@@ -209,12 +180,16 @@ public abstract class NerAsyncFileProcessor implements Processor, AsyncFileProce
 
     @Override
     public boolean process(String tag, BasicTweet[] tweets) {
-        Path inputFilePath = Paths.get(this.getInputDirectory(), tag);
-        File inputFile = new File(inputFilePath.toAbsolutePath().toString());
+        File inputFile = this.makeInputFile(tag);
+        return this.generateInputFile(inputFile, tweets);
+    }
+
+    @Override
+    public boolean generateInputFile(File file, BasicTweet[] tweets) {
         FileWriter fileWriter;
 
         try {
-            fileWriter = new FileWriter(inputFile);
+            fileWriter = new FileWriter(file);
         } catch (IOException e) {
             return false;
         }
