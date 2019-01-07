@@ -4,11 +4,11 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Volume;
 import it.unimib.disco.bigtwine.commons.executors.PerpetualFileExecutor;
-import it.unimib.disco.bigtwine.commons.executors.DockerExecutor;
+import it.unimib.disco.bigtwine.commons.executors.docker.DockerPerpetualExecutor;
 
 import java.io.File;
 
-public class RitterDockerExecutor extends DockerExecutor implements PerpetualFileExecutor {
+public class RitterDockerExecutor extends DockerPerpetualExecutor implements PerpetualFileExecutor {
     public static final String DOCKER_IMAGE = "bigtwine-tool-ner";
 
     private File inputWorkingDirectory;
