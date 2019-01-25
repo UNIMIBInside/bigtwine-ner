@@ -1,13 +1,13 @@
 {
   "generator-jhipster": {
     "promptValues": {
-      "packageName": "it.unimib.disco.bigtwine"
+      "packageName": "it.unimib.disco.bigtwine.services.ner"
     },
-    "jhipsterVersion": "5.7.0",
+    "jhipsterVersion": "5.7.2",
     "applicationType": "microservice",
     "baseName": "ner",
-    "packageName": "it.unimib.disco.bigtwine",
-    "packageFolder": "it/unimib/disco/bigtwine",
+    "packageName": "it.unimib.disco.bigtwine.services.ner",
+    "packageFolder": "it/unimib/disco/bigtwine/services/ner",
     "serverPort": "9002",
     "authenticationType": "jwt",
     "cacheProvider": "no",
@@ -21,7 +21,7 @@
     "serviceDiscoveryType": "eureka",
     "buildTool": "gradle",
     "enableSwaggerCodegen": false,
-    "jwtSecretKey": "NGZlMzJiMTQ5MjFlOTVmNjg0NWViZTE3NDI1YWQ4ZTQ0NjE5ZDM2ZGIwNzg1MmE1MTBkNDc0MDM5Mzg2OWQ0ZmI4ODBjMTAwNmIyYzU0Yzg4NmQ4NmZhZjE0YzNhZTYwMzFiY2RhY2E2ZjY0MTU0MGQzODBiODkzN2ViZmYyNzA=",
+    "jwtSecretKey": "MTRmN2IwYjM3MGVlNGM5NGQwYTY4MGYyZWJhNGY5ODZmMzNjY2E5ZTFlMDUzYTM4MGRiNjc5YTc1NDhmZjI2YWNhMGZlNmFmNmY1N2ZmMmM4MjY2YjdiOTcwMzIyYzM0ZTAyYzdkZThmYWQ2NDAxYzJmNDRjNjExYzM3NjFkZTc=",
     "testFrameworks": [],
     "jhiPrefix": "jhi",
     "otherModules": [],

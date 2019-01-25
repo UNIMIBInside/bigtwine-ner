@@ -161,4 +161,3 @@ application:
     executors:
         ritter-docker:
             classify: true
-
