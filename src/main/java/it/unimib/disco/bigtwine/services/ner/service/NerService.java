@@ -3,6 +3,7 @@ package it.unimib.disco.bigtwine.services.ner.service;
 import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
+import it.unimib.disco.bigtwine.commons.models.Counter;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.commons.processors.GenericProcessor;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
@@ -14,12 +15,15 @@ import it.unimib.disco.bigtwine.services.ner.processors.ProcessorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -30,29 +34,17 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
 
     private MessageChannel channel;
     private ProcessorFactory processorFactory;
+    private KafkaTemplate<Integer, String> kafka;
     private Map<Recognizer, NerProcessor> processors = new HashMap<>();
+    private Map<String, Counter<NerRequestMessage>> requests = new HashMap<>();
 
     public NerService(
         NerResponsesProducerChannel channel,
-        ProcessorFactory processorFactory) {
+        ProcessorFactory processorFactory,
+        KafkaTemplate<Integer, String> kafka) {
         this.channel = channel.nerResponsesChannel();
         this.processorFactory = processorFactory;
-
-        Executors.newSingleThreadScheduledExecutor().schedule(new Runnable() {
-            @Override
-            public void run() {
-                NerRequestMessage msg = new NerRequestMessage();
-                msg.setRecognizer("ritter");
-                msg.setRequestId("a123");
-                BasicTweet tweet1 = new BasicTweet();
-                tweet1.setId("123");
-                tweet1.setText("prova");
-                msg.setTweets(new BasicTweet[] {tweet1});
-                processRequest(msg);
-            }
-        }, 2, TimeUnit.SECONDS);
-
-
+        this.kafka = kafka;
     }
 
     private Recognizer getRecognizer(String recognizerId) {
@@ -100,6 +92,10 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
         return processor;
     }
 
+    private String getNewRequestTag() {
+        return UUID.randomUUID().toString();
+    }
+
     private void processRequest(NerRequestMessage request) {
         Recognizer recognizer = this.getRecognizer(request.getRecognizer());
 
@@ -113,18 +109,39 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
             return;
         }
 
-        processor.process(request.getRequestId(), request.getTweets());
+        String tag = this.getNewRequestTag();
+        this.requests.put(tag, new Counter<>(request, request.getTweets().length));
+        processor.process(tag, request.getTweets());
     }
 
     private void sendResponse(NerProcessor processor, String tag, RecognizedTweet[] tweets) {
-        for (RecognizedTweet tweet : tweets) {
-            System.out.println("Recognize tweet: " + tweet.getId());
+        if (!this.requests.containsKey(tag)) {
+            log.debug("Request tagged '" + tag + "' expired");
+            return;
         }
+
+        Counter<NerRequestMessage> requestCounter = this.requests.get(tag);
+        requestCounter.decrement(tweets.length);
+        NerRequestMessage request = requestCounter.get();
+        if (!requestCounter.hasMore()) {
+            this.requests.remove(tag);
+        }
+
         NerResponseMessage response = new NerResponseMessage();
         response.setRecognizer(processor.getRecognizer().toString());
         response.setTweets(tweets);
         response.setRequestId(tag);
-        this.channel.send(MessageBuilder.withPayload(response).build());
+
+        MessageBuilder<NerResponseMessage> messageBuilder = MessageBuilder
+            .withPayload(response);
+
+        if (request.getOutputTopic() != null) {
+            messageBuilder.setHeader(KafkaHeaders.TOPIC, request.getOutputTopic());
+            this.kafka.send(messageBuilder.build());
+        }else {
+            this.channel.send(messageBuilder.build());
+        }
+
         log.info("Request Processed: {}.", tag);
     }
 
