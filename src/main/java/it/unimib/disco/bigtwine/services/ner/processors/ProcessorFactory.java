@@ -31,7 +31,7 @@ public class ProcessorFactory implements FactoryBean<NerProcessor> {
         return this.recognizer;
     }
 
-    private RitterProcessor getRitterProcessor() throws Exception {
+    private NerProcessor getRitterProcessor() throws Exception {
         Executor executor = this.executorFactory.getExecutor(recognizer);
 
         if (!(executor instanceof PerpetualFileExecutor))
@@ -62,6 +62,10 @@ public class ProcessorFactory implements FactoryBean<NerProcessor> {
         return processor;
     }
 
+    private NerProcessor getTestProcessor() throws Exception {
+        return new TestProcessor();
+    }
+
     public NerProcessor getProcessor() throws Exception {
         if (this.recognizer == null) {
             throw new IllegalArgumentException("recognizer not set");
@@ -70,6 +74,8 @@ public class ProcessorFactory implements FactoryBean<NerProcessor> {
         switch (recognizer) {
             case ritter:
                 return this.getRitterProcessor();
+            case test:
+                return this.getTestProcessor();
             default:
                 return null;
         }
@@ -98,6 +104,8 @@ public class ProcessorFactory implements FactoryBean<NerProcessor> {
         switch (recognizer) {
             case ritter:
                 return RitterProcessor.class;
+            case test:
+                return TestProcessor.class;
             default:
                 return null;
         }
