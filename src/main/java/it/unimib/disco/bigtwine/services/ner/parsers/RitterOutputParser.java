@@ -1,6 +1,6 @@
 package it.unimib.disco.bigtwine.services.ner.parsers;
 
-import it.unimib.disco.bigtwine.commons.models.RecognizedTweet.Entity;
+import it.unimib.disco.bigtwine.commons.models.NamedEntity;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 
 import java.io.*;
@@ -85,8 +85,8 @@ final public class RitterOutputParser implements OutputParser {
         }
     }
 
-    private Entity parseEntity(String line) {
-        Entity entity = new Entity();
+    private NamedEntity parseEntity(String line) {
+        NamedEntity entity = new NamedEntity();
         String[] parts = line.split("\\t+");
         if (parts.length >= 3) {
             entity.setValue(parts[0].trim());
@@ -100,7 +100,7 @@ final public class RitterOutputParser implements OutputParser {
     private RecognizedTweet parse(boolean skipInvalids) throws IOException, MalformedText {
         if (this.buffer == null) throw new AssertionError("A reader was not set");
         RecognizedTweet tweet = new RecognizedTweet();
-        List<Entity> tweetEntities = new ArrayList<>();
+        List<NamedEntity> tweetEntities = new ArrayList<>();
 
         String l;
         while ((l = buffer.readLine()) != null) {
@@ -126,7 +126,7 @@ final public class RitterOutputParser implements OutputParser {
                     tweet.setText(line.content);
                     break;
                 case entity:
-                    Entity e = this.parseEntity(line.content);
+                    NamedEntity e = this.parseEntity(line.content);
                     if (e != null) {
                         tweetEntities.add(e);
                     }
@@ -134,7 +134,7 @@ final public class RitterOutputParser implements OutputParser {
             }
         }
 
-        tweet.setEntities(tweetEntities.toArray(new Entity[0]));
+        tweet.setEntities(tweetEntities.toArray(new NamedEntity[0]));
 
         if (this.isValidTweet(tweet)) {
             return tweet;

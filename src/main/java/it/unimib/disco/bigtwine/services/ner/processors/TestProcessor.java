@@ -2,6 +2,7 @@ package it.unimib.disco.bigtwine.services.ner.processors;
 
 import it.unimib.disco.bigtwine.commons.executors.Executor;
 import it.unimib.disco.bigtwine.commons.models.BasicTweet;
+import it.unimib.disco.bigtwine.commons.models.NamedEntity;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
@@ -56,16 +57,16 @@ public class TestProcessor implements NerProcessor {
         List<RecognizedTweet> tweets = new ArrayList<>();
         for (BasicTweet tweet : items) {
             RecognizedTweet rt = new RecognizedTweet(tweet.getId(), tweet.getText());
-            List<RecognizedTweet.Entity> entities = new ArrayList<>();
+            List<NamedEntity> entities = new ArrayList<>();
             int count = new Random().nextInt(4);
             for (int i = 0; i < count; ++i)  {
-                entities.add(new RecognizedTweet.Entity(
+                entities.add(new NamedEntity(
                     "testvalue",
                     "testlabel",
                     1.0f
                 ));
             }
-            rt.setEntities(entities.toArray(new RecognizedTweet.Entity[0]));
+            rt.setEntities(entities.toArray(new NamedEntity[0]));
             tweets.add(rt);
         }
         this.processorListener.onProcessed(this, tag, tweets.toArray(new RecognizedTweet[0]));
