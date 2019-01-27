@@ -2,8 +2,7 @@ package it.unimib.disco.bigtwine.services.ner.service;
 
 import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
-import it.unimib.disco.bigtwine.commons.models.BasicTweet;
-import it.unimib.disco.bigtwine.commons.models.Counter;
+import it.unimib.disco.bigtwine.commons.messaging.RequestCounter;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
 import it.unimib.disco.bigtwine.commons.processors.GenericProcessor;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class NerService implements ProcessorListener<RecognizedTweet> {
@@ -36,7 +33,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
     private ProcessorFactory processorFactory;
     private KafkaTemplate<Integer, String> kafka;
     private Map<Recognizer, NerProcessor> processors = new HashMap<>();
-    private Map<String, Counter<NerRequestMessage>> requests = new HashMap<>();
+    private Map<String, RequestCounter<NerRequestMessage>> requests = new HashMap<>();
 
     public NerService(
         NerResponsesProducerChannel channel,
@@ -110,7 +107,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
         }
 
         String tag = this.getNewRequestTag();
-        this.requests.put(tag, new Counter<>(request, request.getTweets().length));
+        this.requests.put(tag, new RequestCounter<>(request, request.getTweets().length));
         processor.process(tag, request.getTweets());
     }
 
@@ -120,7 +117,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
             return;
         }
 
-        Counter<NerRequestMessage> requestCounter = this.requests.get(tag);
+        RequestCounter<NerRequestMessage> requestCounter = this.requests.get(tag);
         requestCounter.decrement(tweets.length);
         NerRequestMessage request = requestCounter.get();
         if (!requestCounter.hasMore()) {
