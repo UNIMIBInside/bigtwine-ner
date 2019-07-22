@@ -14,6 +14,7 @@ public interface ApplicationDefaults {
             String workingDirectory = "/tmp/ner";
             boolean useTmpWorkingDirectory = false;
             String fileMonitorSuffixFilter = null;
+            String fileMonitorSuffixExclusion = ".tmp";
         }
     }
 }

@@ -18,6 +18,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public abstract class NerPerpetualFileProcessor implements NerProcessor, PerpetualFileProcessor<BasicTweet> {
@@ -154,8 +155,8 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
     @Override
     public boolean configureProcessor() {
         this.processorId = RandomStringUtils.randomAlphanumeric(16);
-        this.inputDirectory = Paths.get(this.getWorkingDirectory().toString(), this.getProcessorId(), "input").toFile();
-        this.outputDirectory = Paths.get(this.getWorkingDirectory().toString(), this.getProcessorId(), "output").toFile();
+        this.inputDirectory = Paths.get(this.getWorkingDirectory().toString(), "input").toFile();
+        this.outputDirectory = Paths.get(this.getWorkingDirectory().toString(), "output").toFile();
 
         if (!this.setupWorkingDirectory()) {
             return false;
@@ -185,10 +186,16 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
 
     @Override
     public boolean generateInputFile(File file, BasicTweet[] tweets) {
+        File tmpFile;
+        try {
+            tmpFile = File.createTempFile(file.getName(), ".tmp", file.getAbsoluteFile().getParentFile());
+        } catch (IOException e) {
+            return false;
+        }
         FileWriter fileWriter;
 
         try {
-            fileWriter = new FileWriter(file);
+            fileWriter = new FileWriter(tmpFile);
         } catch (IOException e) {
             return false;
         }
@@ -206,6 +213,12 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
             inputProducer.append(tweets);
             inputProducer.close();
         } catch (IOException e) {
+            return false;
+        }
+
+        try {
+            Files.move(tmpFile.toPath(), file.toPath());
+        } catch (IOException | SecurityException e) {
             return false;
         }
 

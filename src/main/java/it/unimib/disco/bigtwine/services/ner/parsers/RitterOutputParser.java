@@ -2,6 +2,8 @@ package it.unimib.disco.bigtwine.services.ner.parsers;
 
 import it.unimib.disco.bigtwine.commons.models.NamedEntity;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
+import it.unimib.disco.bigtwine.commons.models.dto.NamedEntityDTO;
+import it.unimib.disco.bigtwine.commons.models.dto.RecognizedTweetDTO;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -86,7 +88,7 @@ final public class RitterOutputParser implements OutputParser {
     }
 
     private NamedEntity parseEntity(String line) {
-        NamedEntity entity = new NamedEntity();
+        NamedEntity entity = new NamedEntityDTO();
         String[] parts = line.split("\\t+");
         if (parts.length >= 3) {
             entity.setValue(parts[0].trim());
@@ -99,7 +101,7 @@ final public class RitterOutputParser implements OutputParser {
 
     private RecognizedTweet parse(boolean skipInvalids) throws IOException, MalformedText {
         if (this.buffer == null) throw new AssertionError("A reader was not set");
-        RecognizedTweet tweet = new RecognizedTweet();
+        RecognizedTweet tweet = new RecognizedTweetDTO();
         List<NamedEntity> tweetEntities = new ArrayList<>();
 
         String l;

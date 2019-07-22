@@ -1,6 +1,7 @@
 package it.unimib.disco.bigtwine.services.ner.executors;
 
 import it.unimib.disco.bigtwine.commons.executors.Executor;
+import it.unimib.disco.bigtwine.commons.executors.NopExecutor;
 import it.unimib.disco.bigtwine.services.ner.config.ApplicationProperties;
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
 import org.springframework.beans.factory.FactoryBean;
@@ -34,7 +35,7 @@ public class ExecutorFactory implements FactoryBean<Executor> {
 
         switch (recognizer) {
             case ritter:
-                return new RitterDockerExecutor();
+                return new NopExecutor();
             default:
                 return null;
         }

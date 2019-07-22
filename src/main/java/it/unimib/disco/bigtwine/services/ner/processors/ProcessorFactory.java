@@ -43,6 +43,7 @@ public class ProcessorFactory implements FactoryBean<NerProcessor> {
             OutputParserBuilder.getDefaultBuilder());
 
         final String suffixFilter = this.processorsProps.getRitter().getFileMonitorSuffixFilter();
+        final String suffixExclusion = this.processorsProps.getRitter().getFileMonitorSuffixExclusion();
         final boolean useTmpWD = this.processorsProps.getRitter().getUseTmpWorkingDirectory();
         final String wds = this.processorsProps.getRitter().getWorkingDirectory();
 
@@ -52,12 +53,11 @@ public class ProcessorFactory implements FactoryBean<NerProcessor> {
         }else {
             wd = new File(wds);
         }
-        processor.setWorkingDirectory(wd);
 
-        if (suffixFilter != null) {
-            processor.setMonitorFilesOnly(true);
-            processor.setMonitorSuffixFilter(suffixFilter);
-        }
+        processor.setWorkingDirectory(wd);
+        processor.setMonitorFilesOnly(true);
+        processor.setMonitorSuffixFilter(suffixFilter);
+        processor.setMonitorSuffixExclusion(suffixExclusion);
 
         return processor;
     }

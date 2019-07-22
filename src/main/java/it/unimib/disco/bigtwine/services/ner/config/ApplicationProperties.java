@@ -48,6 +48,7 @@ public class ApplicationProperties {
             private String workingDirectory = ApplicationDefaults.Processors.Ritter.workingDirectory;
             private boolean useTmpWorkingDirectory = ApplicationDefaults.Processors.Ritter.useTmpWorkingDirectory;
             private String fileMonitorSuffixFilter = ApplicationDefaults.Processors.Ritter.fileMonitorSuffixFilter;
+            private String fileMonitorSuffixExclusion = ApplicationDefaults.Processors.Ritter.fileMonitorSuffixExclusion;
 
             public String getWorkingDirectory() {
                 return workingDirectory;
@@ -75,6 +76,14 @@ public class ApplicationProperties {
 
             public void setFileMonitorSuffixFilter(String fileMonitorSuffixFilter) {
                 this.fileMonitorSuffixFilter = fileMonitorSuffixFilter;
+            }
+
+            public String getFileMonitorSuffixExclusion() {
+                return fileMonitorSuffixExclusion;
+            }
+
+            public void setFileMonitorSuffixExclusion(String fileMonitorSuffixExclusion) {
+                this.fileMonitorSuffixExclusion = fileMonitorSuffixExclusion;
             }
         }
 
