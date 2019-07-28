@@ -1,11 +1,10 @@
 package it.unimib.disco.bigtwine.services.ner.parsers;
 
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
-import javafx.util.Builder;
 
 import java.io.*;
 
-public class OutputParserBuilder implements Builder<OutputParser> {
+public class OutputParserBuilder {
 
     private Recognizer recognizer;
 
@@ -47,7 +46,6 @@ public class OutputParserBuilder implements Builder<OutputParser> {
         return this;
     }
 
-    @Override
     public OutputParser build() {
         if (this.recognizer == null) {
             return null;

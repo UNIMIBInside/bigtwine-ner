@@ -2,12 +2,11 @@ package it.unimib.disco.bigtwine.services.ner.producers;
 
 import it.unimib.disco.bigtwine.commons.csv.CSVFactory;
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
-import javafx.util.Builder;
 
 import java.io.IOException;
 import java.io.Writer;
 
-public class InputProducerBuilder implements Builder<InputProducer> {
+public class InputProducerBuilder {
 
     private Recognizer recognizer;
 
@@ -35,7 +34,6 @@ public class InputProducerBuilder implements Builder<InputProducer> {
         return writer;
     }
 
-    @Override
     public InputProducer build() {
         if (this.recognizer == null) {
             return null;
