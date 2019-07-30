@@ -155,9 +155,10 @@ application:
     default-recognizer: ritter
     processors:
         ritter:
-            working-directory: /Users/Fausto/Desktop/ner
+            working-directory: /tmp/ner
             use-tmp-working-directory: false
-            file-monitor-suffix-filter: .out
+            file-monitor-suffix-filter: null
+            file-monitor-suffix-exclusion: .tmp
     executors:
         ritter-docker:
             classify: true
