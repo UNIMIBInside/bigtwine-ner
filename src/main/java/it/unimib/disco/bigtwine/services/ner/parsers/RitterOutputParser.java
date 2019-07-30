@@ -136,7 +136,7 @@ final public class RitterOutputParser implements OutputParser {
             }
         }
 
-        tweet.setEntities(tweetEntities.toArray(new NamedEntity[0]));
+        tweet.setEntities(tweetEntities.toArray(new NamedEntityDTO[0]));
 
         if (this.isValidTweet(tweet)) {
             return tweet;

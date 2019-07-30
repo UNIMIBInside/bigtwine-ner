@@ -14,6 +14,8 @@ import it.unimib.disco.bigtwine.services.ner.producers.InputProducerBuilder;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.lang.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -22,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public abstract class NerPerpetualFileProcessor implements NerProcessor, PerpetualFileProcessor<BasicTweet> {
+
+    private final Logger log = LoggerFactory.getLogger(NerPerpetualFileProcessor.class);
 
     protected PerpetualFileExecutor executor;
     protected OutputParserBuilder outputParserBuilder;
@@ -159,6 +163,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
         this.outputDirectory = Paths.get(this.getWorkingDirectory().toString(), "output").toFile();
 
         if (!this.setupWorkingDirectory()) {
+            log.debug("Cannot setup working directory");
             return false;
         }
 
@@ -167,6 +172,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
         this.getPerpetualExecutor().run();
 
         if (!this.configureFileMonitor()) {
+            log.debug("Cannot configure file monitor");
             return false;
         }
 
@@ -197,6 +203,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
         try {
             fileWriter = new FileWriter(tmpFile);
         } catch (IOException e) {
+            log.debug("Cannot generate file writer: {}", e.getMessage());
             return false;
         }
 
@@ -213,12 +220,14 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
             inputProducer.append(tweets);
             inputProducer.close();
         } catch (IOException e) {
+            log.debug("Cannot append tweets to input producer: {}", e.getMessage());
             return false;
         }
 
         try {
             Files.move(tmpFile.toPath(), file.toPath());
         } catch (IOException | SecurityException e) {
+            log.debug("Cannot move generated input file to destination: {}", e.getMessage());
             return false;
         }
 
@@ -227,6 +236,8 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
 
     @Override
     public void processOutputFile(File outputFile) {
+        log.debug("Output file ready to parse: {}", outputFile.toString());
+
         OutputParser outputParser = this.outputParserBuilder
             .setRecognizer(this.getRecognizer())
             .setInput(outputFile)
@@ -240,6 +251,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
         RecognizedTweet[] tweets = outputParser.tweets();
 
         if (!tag.isEmpty() && this.processorListener != null && tweets != null) {
+            log.debug("Processed {} tweets", tweets.length);
             this.processorListener.onProcessed(this, tag, tweets);
         }
     }

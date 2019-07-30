@@ -4,6 +4,7 @@ import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
 import it.unimib.disco.bigtwine.commons.messaging.RequestCounter;
 import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
+import it.unimib.disco.bigtwine.commons.models.dto.RecognizedTweetDTO;
 import it.unimib.disco.bigtwine.commons.processors.GenericProcessor;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.services.ner.messaging.NerRequestsConsumerChannel;
@@ -20,6 +21,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -126,7 +128,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
 
         NerResponseMessage response = new NerResponseMessage();
         response.setRecognizer(processor.getRecognizer().toString());
-        response.setTweets(tweets);
+        response.setTweets(Arrays.asList(tweets).toArray(new RecognizedTweetDTO[tweets.length]));
         response.setRequestId(tag);
 
         MessageBuilder<NerResponseMessage> messageBuilder = MessageBuilder

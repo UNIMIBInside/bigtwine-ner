@@ -68,7 +68,7 @@ public class TestProcessor implements NerProcessor {
                     1.0f
                 ));
             }
-            rt.setEntities(entities.toArray(new NamedEntity[0]));
+            rt.setEntities(entities.toArray(new NamedEntityDTO[0]));
             tweets.add(rt);
         }
         this.processorListener.onProcessed(this, tag, tweets.toArray(new RecognizedTweet[0]));
