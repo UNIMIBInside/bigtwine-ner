@@ -1,7 +1,6 @@
 package it.unimib.disco.bigtwine.services.ner.producers;
 
-import it.unimib.disco.bigtwine.commons.models.BasicTweet;
-import it.unimib.disco.bigtwine.commons.models.dto.BasicTweetDTO;
+import it.unimib.disco.bigtwine.services.ner.domain.PlainText;
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -19,8 +18,8 @@ public class RitterInputProducerTest {
             .setWriter(writer)
             .build();
 
-        BasicTweet tweet = new BasicTweetDTO();
-        tweet.setId("1");
+        PlainText tweet = new PlainText();
+        tweet.setTag("1");
         tweet.setText("prova");
         producer.append(tweet);
 
@@ -40,13 +39,13 @@ public class RitterInputProducerTest {
             .setWriter(writer)
             .build();
 
-        BasicTweet tweet1 = new BasicTweetDTO();
-        tweet1.setId("1");
+        PlainText tweet1 = new PlainText();
+        tweet1.setTag("1");
         tweet1.setText("prova1");
-        BasicTweet tweet2 = new BasicTweetDTO();
-        tweet2.setId("2");
+        PlainText tweet2 = new PlainText();
+        tweet2.setTag("2");
         tweet2.setText("prova2");
-        producer.append(new BasicTweet[]{tweet1, tweet2});
+        producer.append(new PlainText[]{tweet1, tweet2});
 
         producer.close();
 

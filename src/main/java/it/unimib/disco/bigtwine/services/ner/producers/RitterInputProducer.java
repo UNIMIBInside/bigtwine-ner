@@ -2,7 +2,7 @@ package it.unimib.disco.bigtwine.services.ner.producers;
 
 import it.unimib.disco.bigtwine.commons.csv.CSVFactory;
 import it.unimib.disco.bigtwine.commons.csv.CSVWriter;
-import it.unimib.disco.bigtwine.commons.models.BasicTweet;
+import it.unimib.disco.bigtwine.services.ner.domain.PlainText;
 
 import java.io.*;
 
@@ -31,9 +31,9 @@ final public class RitterInputProducer implements InputProducer {
     }
 
     @Override
-    public void append(BasicTweet tweet) throws IOException {
+    public void append(PlainText tweet) throws IOException {
         if (this.buffer == null) throw new AssertionError("A writer was not set");
-        this.csvWriter.writeRecord(tweet.getId(), tweet.getText());
+        this.csvWriter.writeRecord(tweet.getTag(), tweet.getText());
     }
 
     @Override

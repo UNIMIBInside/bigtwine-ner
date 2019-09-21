@@ -1,11 +1,9 @@
 package it.unimib.disco.bigtwine.services.ner.processors;
 
 import it.unimib.disco.bigtwine.commons.executors.Executor;
-import it.unimib.disco.bigtwine.commons.models.BasicTweet;
-import it.unimib.disco.bigtwine.commons.models.NamedEntity;
-import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
-import it.unimib.disco.bigtwine.commons.models.dto.NamedEntityDTO;
-import it.unimib.disco.bigtwine.commons.models.dto.RecognizedTweetDTO;
+import it.unimib.disco.bigtwine.services.ner.domain.PlainText;
+import it.unimib.disco.bigtwine.services.ner.domain.NamedEntity;
+import it.unimib.disco.bigtwine.services.ner.domain.RecognizedText;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
 
@@ -17,7 +15,7 @@ public class TestProcessor implements NerProcessor {
 
     public static final Recognizer recognizer = Recognizer.test;
 
-    private ProcessorListener<RecognizedTweet> processorListener;
+    private ProcessorListener<RecognizedText> processorListener;
 
     @Override
     public Recognizer getRecognizer() {
@@ -40,7 +38,7 @@ public class TestProcessor implements NerProcessor {
     }
 
     @Override
-    public void setListener(ProcessorListener<RecognizedTweet> listener) {
+    public void setListener(ProcessorListener<RecognizedText> listener) {
         this.processorListener = listener;
     }
 
@@ -50,28 +48,28 @@ public class TestProcessor implements NerProcessor {
     }
 
     @Override
-    public boolean process(String tag, BasicTweet item) {
-        return this.process(tag, new BasicTweet[]{item});
+    public boolean process(String tag, PlainText item) {
+        return this.process(tag, new PlainText[]{item});
     }
 
     @Override
-    public boolean process(String tag, BasicTweet[] items) {
-        List<RecognizedTweet> tweets = new ArrayList<>();
-        for (BasicTweet tweet : items) {
-            RecognizedTweet rt = new RecognizedTweetDTO(tweet.getId(), tweet.getText());
+    public boolean process(String tag, PlainText[] items) {
+        List<RecognizedText> tweets = new ArrayList<>();
+        for (PlainText tweet : items) {
+            RecognizedText rt = new RecognizedText(tweet.getTag(), tweet.getText());
             List<NamedEntity> entities = new ArrayList<>();
             int count = new Random().nextInt(4);
             for (int i = 0; i < count; ++i)  {
-                entities.add(new NamedEntityDTO(
+                entities.add(new NamedEntity(
                     "testvalue",
                     "testlabel",
                     1.0f
                 ));
             }
-            rt.setEntities(entities.toArray(new NamedEntityDTO[0]));
+            rt.setEntities(entities.toArray(new NamedEntity[0]));
             tweets.add(rt);
         }
-        this.processorListener.onProcessed(this, tag, tweets.toArray(new RecognizedTweet[0]));
+        this.processorListener.onProcessed(this, tag, tweets.toArray(new RecognizedText[0]));
         return true;
     }
 }

@@ -1,7 +1,6 @@
 package it.unimib.disco.bigtwine.services.ner.parsers;
 
-import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
-import it.unimib.disco.bigtwine.services.ner.parsers.RitterOutputParser;
+import it.unimib.disco.bigtwine.services.ner.domain.RecognizedText;
 import org.junit.Test;
 
 import java.io.File;
@@ -22,21 +21,19 @@ public class RitterOutputParserTest {
         );
 
         RitterOutputParser parser = new RitterOutputParser(input);
-        RecognizedTweet[] tweets = parser.tweets();
+        RecognizedText[] tweets = parser.tweets();
 
         assertEquals(1, tweets.length);
 
-        RecognizedTweet tweet = tweets[0];
+        RecognizedText tweet = tweets[0];
 
-        assertEquals("536886411509899000", tweet.getId());
+        assertEquals("536886411509899000", tweet.getTag());
         assertEquals("£100 return flights to Ibiza In the middle of July???? Sureeeeeeely\uD83D\uDC83", tweet.getText());
         assertEquals(3, tweet.getEntities().length);
         assertEquals("Ibiza", tweet.getEntity(1).getValue());
         assertEquals("geo-loc", tweet.getEntity(1).getLabel());
         assertEquals(133, (int)(tweet.getEntity(1).getProbability() * 100));
     }
-
-
 
     @Test
     public void testParseMultiple() throws IOException {
@@ -60,7 +57,7 @@ public class RitterOutputParserTest {
         );
 
         RitterOutputParser parser = new RitterOutputParser(input);
-        RecognizedTweet[] tweets = parser.tweets();
+        RecognizedText[] tweets = parser.tweets();
 
         assertEquals(3, tweets.length);
         assertEquals(3, tweets[0].getEntities().length);
@@ -75,7 +72,7 @@ public class RitterOutputParserTest {
         assertTrue(file.exists());
 
         RitterOutputParser parser = new RitterOutputParser(file);
-        RecognizedTweet[] tweets = parser.tweets();
+        RecognizedText[] tweets = parser.tweets();
 
         assertEquals(6025, tweets.length);
     }

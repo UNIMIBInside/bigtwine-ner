@@ -1,9 +1,7 @@
 package it.unimib.disco.bigtwine.services.ner.parsers;
 
-import it.unimib.disco.bigtwine.commons.models.NamedEntity;
-import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
-import it.unimib.disco.bigtwine.commons.models.dto.NamedEntityDTO;
-import it.unimib.disco.bigtwine.commons.models.dto.RecognizedTweetDTO;
+import it.unimib.disco.bigtwine.services.ner.domain.NamedEntity;
+import it.unimib.disco.bigtwine.services.ner.domain.RecognizedText;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -14,7 +12,7 @@ final public class RitterOutputParser implements OutputParser {
 
     private Reader reader;
     private BufferedReader buffer;
-    private RecognizedTweet nextTweet;
+    private RecognizedText nextTweet;
 
     public RitterOutputParser() {
     }
@@ -62,9 +60,9 @@ final public class RitterOutputParser implements OutputParser {
         this.buffer = new BufferedReader(reader);
     }
 
-    private boolean isValidTweet(RecognizedTweet tweet) {
+    private boolean isValidTweet(RecognizedText tweet) {
         boolean isValid = true;
-        isValid = isValid && tweet.getId() != null && !tweet.getId().isEmpty();
+        isValid = isValid && tweet.getTag() != null && !tweet.getTag().isEmpty();
         isValid = isValid && tweet.getText() != null && !tweet.getText().isEmpty();
         return isValid;
     }
@@ -88,7 +86,7 @@ final public class RitterOutputParser implements OutputParser {
     }
 
     private NamedEntity parseEntity(String line) {
-        NamedEntity entity = new NamedEntityDTO();
+        NamedEntity entity = new NamedEntity();
         String[] parts = line.split("\\t+");
         if (parts.length >= 3) {
             entity.setValue(parts[0].trim());
@@ -99,9 +97,9 @@ final public class RitterOutputParser implements OutputParser {
         return entity;
     }
 
-    private RecognizedTweet parse(boolean skipInvalids) throws IOException, MalformedText {
+    private RecognizedText parse(boolean skipInvalids) throws IOException, MalformedText {
         if (this.buffer == null) throw new AssertionError("A reader was not set");
-        RecognizedTweet tweet = new RecognizedTweetDTO();
+        RecognizedText tweet = new RecognizedText();
         List<NamedEntity> tweetEntities = new ArrayList<>();
 
         String l;
@@ -122,7 +120,7 @@ final public class RitterOutputParser implements OutputParser {
 
             switch (line.kind) {
                 case id:
-                    tweet.setId(line.content);
+                    tweet.setTag(line.content);
                     break;
                 case text:
                     tweet.setText(line.content);
@@ -136,7 +134,7 @@ final public class RitterOutputParser implements OutputParser {
             }
         }
 
-        tweet.setEntities(tweetEntities.toArray(new NamedEntityDTO[0]));
+        tweet.setEntities(tweetEntities.toArray(new NamedEntity[0]));
 
         if (this.isValidTweet(tweet)) {
             return tweet;
@@ -150,7 +148,7 @@ final public class RitterOutputParser implements OutputParser {
         }
     }
 
-    private RecognizedTweet parse() throws IOException, MalformedText {
+    private RecognizedText parse() throws IOException, MalformedText {
         return this.parse(true);
     }
 
@@ -169,9 +167,9 @@ final public class RitterOutputParser implements OutputParser {
     }
 
     @Override
-    public RecognizedTweet next() {
+    public RecognizedText next() {
         if (this.hasNext()) {
-            RecognizedTweet tweet = this.nextTweet;
+            RecognizedText tweet = this.nextTweet;
             this.nextTweet = null;
             return tweet;
         }
@@ -180,13 +178,13 @@ final public class RitterOutputParser implements OutputParser {
     }
 
     @Override
-    public RecognizedTweet[] items() {
-        List<RecognizedTweet> tweets = new ArrayList<>();
+    public RecognizedText[] items() {
+        List<RecognizedText> tweets = new ArrayList<>();
         while (this.hasNext()) {
             tweets.add(this.nextTweet);
             this.nextTweet = null;
         }
 
-        return tweets.toArray(new RecognizedTweet[0]);
+        return tweets.toArray(new RecognizedText[0]);
     }
 }

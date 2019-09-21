@@ -3,8 +3,8 @@ package it.unimib.disco.bigtwine.services.ner.processors;
 import it.unimib.disco.bigtwine.commons.executors.*;
 import it.unimib.disco.bigtwine.commons.executors.PerpetualFileExecutor;
 import it.unimib.disco.bigtwine.commons.executors.PerpetualExecutor;
-import it.unimib.disco.bigtwine.commons.models.BasicTweet;
-import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
+import it.unimib.disco.bigtwine.services.ner.domain.PlainText;
+import it.unimib.disco.bigtwine.services.ner.domain.RecognizedText;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
 import it.unimib.disco.bigtwine.commons.processors.file.PerpetualFileProcessor;
 import it.unimib.disco.bigtwine.services.ner.parsers.OutputParser;
@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public abstract class NerPerpetualFileProcessor implements NerProcessor, PerpetualFileProcessor<BasicTweet> {
+public abstract class NerPerpetualFileProcessor implements NerProcessor, PerpetualFileProcessor<PlainText> {
 
     private final Logger log = LoggerFactory.getLogger(NerPerpetualFileProcessor.class);
 
@@ -37,7 +37,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
     protected File outputDirectory;
     protected boolean monitorFilesOnly;
     protected String monitorSuffixFilter;
-    protected ProcessorListener<RecognizedTweet> processorListener;
+    protected ProcessorListener<RecognizedText> processorListener;
 
     public NerPerpetualFileProcessor(PerpetualFileExecutor executor, InputProducerBuilder inputProducerBuilder, OutputParserBuilder outputParserBuilder) {
         this.setExecutor(executor);
@@ -152,7 +152,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
     }
 
     @Override
-    public void setListener(ProcessorListener<RecognizedTweet> listener) {
+    public void setListener(ProcessorListener<RecognizedText> listener) {
         this.processorListener = listener;
     }
 
@@ -180,18 +180,18 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
     }
 
     @Override
-    public boolean process(String tag, BasicTweet tweet) {
-        return this.process(tag, new BasicTweet[]{tweet});
+    public boolean process(String tag, PlainText tweet) {
+        return this.process(tag, new PlainText[]{tweet});
     }
 
     @Override
-    public boolean process(String tag, BasicTweet[] tweets) {
+    public boolean process(String tag, PlainText[] tweets) {
         File inputFile = this.makeInputFile(tag);
         return this.generateInputFile(inputFile, tweets);
     }
 
     @Override
-    public boolean generateInputFile(File file, BasicTweet[] tweets) {
+    public boolean generateInputFile(File file, PlainText[] tweets) {
         File tmpFile;
         try {
             tmpFile = File.createTempFile(file.getName(), ".tmp", file.getAbsoluteFile().getParentFile());
@@ -248,7 +248,7 @@ public abstract class NerPerpetualFileProcessor implements NerProcessor, Perpetu
         }
 
         String tag = FilenameUtils.removeExtension(outputFile.getName());
-        RecognizedTweet[] tweets = outputParser.tweets();
+        RecognizedText[] tweets = outputParser.tweets();
 
         if (!tag.isEmpty() && this.processorListener != null && tweets != null) {
             log.debug("Processed {} tweets", tweets.length);

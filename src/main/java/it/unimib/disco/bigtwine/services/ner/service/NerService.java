@@ -3,10 +3,12 @@ package it.unimib.disco.bigtwine.services.ner.service;
 import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
 import it.unimib.disco.bigtwine.commons.messaging.RequestCounter;
-import it.unimib.disco.bigtwine.commons.models.RecognizedTweet;
-import it.unimib.disco.bigtwine.commons.models.dto.RecognizedTweetDTO;
+import it.unimib.disco.bigtwine.commons.messaging.dto.RecognizedTextDTO;
+import it.unimib.disco.bigtwine.services.ner.domain.PlainText;
+import it.unimib.disco.bigtwine.services.ner.domain.RecognizedText;
 import it.unimib.disco.bigtwine.commons.processors.GenericProcessor;
 import it.unimib.disco.bigtwine.commons.processors.ProcessorListener;
+import it.unimib.disco.bigtwine.services.ner.domain.mapper.NerMapper;
 import it.unimib.disco.bigtwine.services.ner.messaging.NerRequestsConsumerChannel;
 import it.unimib.disco.bigtwine.services.ner.messaging.NerResponsesProducerChannel;
 import it.unimib.disco.bigtwine.services.ner.Recognizer;
@@ -21,13 +23,12 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class NerService implements ProcessorListener<RecognizedTweet> {
+public class NerService implements ProcessorListener<RecognizedText> {
 
     private final Logger log = LoggerFactory.getLogger(NerService.class);
 
@@ -109,26 +110,29 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
         }
 
         String tag = this.getNewRequestTag();
-        this.requests.put(tag, new RequestCounter<>(request, request.getTweets().length));
-        processor.process(tag, request.getTweets());
+        PlainText[] texts = NerMapper.INSTANCE.plainTextsFromDTOs(request.getTexts());
+        this.requests.put(tag, new RequestCounter<>(request, texts.length));
+        processor.process(tag, texts);
     }
 
-    private void sendResponse(NerProcessor processor, String tag, RecognizedTweet[] tweets) {
+    private void sendResponse(NerProcessor processor, String tag, RecognizedText[] texts) {
         if (!this.requests.containsKey(tag)) {
             log.debug("Request tagged '" + tag + "' expired");
             return;
         }
 
         RequestCounter<NerRequestMessage> requestCounter = this.requests.get(tag);
-        requestCounter.decrement(tweets.length);
+        requestCounter.decrement(texts.length);
         NerRequestMessage request = requestCounter.get();
         if (!requestCounter.hasMore()) {
             this.requests.remove(tag);
         }
 
+        RecognizedTextDTO[] textDTOs = NerMapper.INSTANCE.dtosFromRecognizedTexts(texts);
+
         NerResponseMessage response = new NerResponseMessage();
         response.setRecognizer(processor.getRecognizer().toString());
-        response.setTweets(Arrays.asList(tweets).toArray(new RecognizedTweetDTO[tweets.length]));
+        response.setTexts(textDTOs);
         response.setRequestId(tag);
 
         MessageBuilder<NerResponseMessage> messageBuilder = MessageBuilder
@@ -151,7 +155,7 @@ public class NerService implements ProcessorListener<RecognizedTweet> {
     }
 
     @Override
-    public void onProcessed(GenericProcessor processor, String tag, RecognizedTweet[] tweets) {
+    public void onProcessed(GenericProcessor processor, String tag, RecognizedText[] tweets) {
         if (!(processor instanceof NerProcessor)) {
             throw new AssertionError("Invalid processor type");
         }
