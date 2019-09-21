@@ -13,6 +13,6 @@ public interface NerMapper {
 
     PlainText plainTextFromDTO(PlainTextDTO plainTextDTO);
     PlainText[] plainTextsFromDTOs(PlainTextDTO[] plainTextDTO);
-    RecognizedTextDTO dtoFromRecognizedText(PlainText plainText);
+    RecognizedTextDTO dtoFromRecognizedText(RecognizedText recognizedText);
     RecognizedTextDTO[] dtosFromRecognizedTexts(RecognizedText[] plainText);
 }
