@@ -66,6 +66,7 @@ public class NerConfiguration {
     public Map<String, Object> producerConfigs() {
         String bootstrapServers = KafkaUtils.buildBootstrapServersConfig(this.kafkaBrokers, this.kafkaDefaultBrokerPort);
 
+        // See https://kafka.apache.org/documentation/#producerconfigs for more properties
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -73,13 +74,12 @@ public class NerConfiguration {
 
         log.debug("Configuring kafka with props: {}", props);
 
-        // See https://kafka.apache.org/documentation/#producerconfigs for more properties
         return props;
     }
 
     @Bean
     public KafkaTemplate<Integer, String> kafkaTemplate() {
-        return new KafkaTemplate<Integer, String>(producerFactory());
+        return new KafkaTemplate<>(producerFactory());
     }
 
 }
