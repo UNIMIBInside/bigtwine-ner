@@ -3,6 +3,7 @@ package it.unimib.disco.bigtwine.services.ner.service;
 import it.unimib.disco.bigtwine.commons.messaging.NerRequestMessage;
 import it.unimib.disco.bigtwine.commons.messaging.NerResponseMessage;
 import it.unimib.disco.bigtwine.commons.messaging.RequestCounter;
+import it.unimib.disco.bigtwine.commons.messaging.ResponseMessage;
 import it.unimib.disco.bigtwine.commons.messaging.dto.RecognizedTextDTO;
 import it.unimib.disco.bigtwine.services.ner.domain.PlainText;
 import it.unimib.disco.bigtwine.services.ner.domain.RecognizedText;
@@ -100,12 +101,14 @@ public class NerService implements ProcessorListener<RecognizedText> {
         Recognizer recognizer = this.getRecognizer(request.getRecognizer());
 
         if (recognizer == null) {
+            this.sendRejected(request);
             return;
         }
 
         NerProcessor processor = this.getProcessor(recognizer);
 
         if (processor == null) {
+            this.sendRejected(request);
             return;
         }
 
@@ -113,6 +116,18 @@ public class NerService implements ProcessorListener<RecognizedText> {
         PlainText[] texts = NerMapper.INSTANCE.plainTextsFromDTOs(request.getTexts());
         this.requests.put(tag, new RequestCounter<>(request, texts.length));
         processor.process(tag, texts);
+    }
+
+    private void sendExpired(NerRequestMessage request) {
+        NerResponseMessage response = new NerResponseMessage();
+        response.setStatus(ResponseMessage.Status.EXPIRED);
+        this.doSendResponse(request, response);
+    }
+
+    private void sendRejected(NerRequestMessage request) {
+        NerResponseMessage response = new NerResponseMessage();
+        response.setStatus(ResponseMessage.Status.REJECTED);
+        this.doSendResponse(request, response);
     }
 
     private void sendResponse(NerProcessor processor, String tag, RecognizedText[] texts) {
@@ -135,6 +150,20 @@ public class NerService implements ProcessorListener<RecognizedText> {
         response.setTexts(textDTOs);
         response.setRequestId(tag);
 
+        this.doSendResponse(request, response);
+
+        log.info("Request Processed: {}.", tag);
+    }
+
+    private void doSendResponse(NerRequestMessage request, NerResponseMessage response) {
+        if (response.getRequestId() == null) {
+            response.setRequestId(request.getRequestId());
+        }
+
+        if (response.getTexts() == null) {
+            response.setTexts(new RecognizedTextDTO[0]);
+        }
+
         MessageBuilder<NerResponseMessage> messageBuilder = MessageBuilder
             .withPayload(response);
 
@@ -144,14 +173,17 @@ public class NerService implements ProcessorListener<RecognizedText> {
         }else {
             this.channel.send(messageBuilder.build());
         }
-
-        log.info("Request Processed: {}.", tag);
     }
 
     @StreamListener(NerRequestsConsumerChannel.CHANNEL)
     public void onNewRequest(NerRequestMessage request) {
-        log.info("Request Received: {}.", request.getRequestId());
-        this.processRequest(request);
+        if (request.getExpiration() > 0 && System.currentTimeMillis() > request.getExpiration()) {
+            log.warn("Request expired before processing: {}.", request.getRequestId());
+            this.sendExpired(request);
+        } else {
+            log.info("Request Received: {}.", request.getRequestId());
+            this.processRequest(request);
+        }
     }
 
     @Override
